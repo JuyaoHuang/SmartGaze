@@ -3,3 +3,5 @@
 *.env
 *.__pycache__/
 .vscode/
+face_detection/cmake-build-debug/
+*.cmake-build-debug/

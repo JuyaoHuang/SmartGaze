@@ -1,33 +1,84 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.15)  # 匹配 utils 的最低版本要求
 project(FaceRecognition_Core)
 
 set(CMAKE_CXX_STANDARD 14)
 
-# 1. 设置 OpenCV 的路径引导
-# 告诉 CMake 去哪里找 OpenCVConfig.cmake
-# 注意路径要指向包含 OpenCVConfig.cmake 的那个文件夹
-set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/lib/cmake/opencv4)
+# ========================================
+# 1. 第三方库配置
+# ========================================
 
-# 2. 查找 OpenCV 包 (必须放在 set OpenCV_DIR 之后)
-# STATIC 表示我们要查找静态库
+# 1.1 设置 OpenCV 的路径引导
+set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/third_party/opencv/lib/cmake/opencv4)
+
+# 1.2 查找 OpenCV 包
 find_package(OpenCV REQUIRED)
 
-# 3. 打印一下日志，确保找到了
+# 1.3 打印日志
 message(STATUS "OpenCV library status:")
 message(STATUS "    version: ${OpenCV_VERSION}")
 message(STATUS "    libraries: ${OpenCV_LIBS}")
 message(STATUS "    include path: ${OpenCV_INCLUDE_DIRS}")
 
-# 4. RKNN 配置 (保持不变)
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/rknn/include)
-link_directories(${CMAKE_SOURCE_DIR}/3rdparty/rknn/lib)
+# 1.4 RKNN 配置
+include_directories(${CMAKE_SOURCE_DIR}/third_party/rknn/include)
+link_directories(${CMAKE_SOURCE_DIR}/third_party/rknn/lib)
 
-# 5. 生成库
-add_library(face_engine SHARED src/face_engine.cpp)
+# ========================================
+# 2. 添加子目录（utils 工具库）
+# ========================================
 
-# 6. 链接库
-# ${OpenCV_LIBS} 会自动包含 core, imgproc, imgcodecs 以及它们依赖的系统库(zlib, dl, pthread等)
-target_link_libraries(face_engine
-    rknnrt
-    ${OpenCV_LIBS} 
+# 设置 utils 需要的变量
+set(DISABLE_RGA TRUE)          # 禁用 RGA，使用 OpenCV
+set(DISABLE_LIBJPEG TRUE)      # 禁用 libjpeg，使用 OpenCV
+
+# 添加 utils 子项目（会生成 fileutils 和 imageutils 静态库）
+add_subdirectory(utils)
+
+# ========================================
+# 3. 项目头文件路径
+# ========================================
+
+include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/utils)  # rknn_model_zoo utils 头文件
+include_directories(${CMAKE_SOURCE_DIR}/examples/RetinaFace/cpp)  # RetinaFace 头文件
+include_directories(${OpenCV_INCLUDE_DIRS})
+
+# ========================================
+# 4. 源文件列表
+# ========================================
+
+set(SOURCES
+    src/face_engine.cpp
+    src/face_aligner.cpp
+    src/mobilefacenet.cpp
+    src/retinaface.cpp
+    src/utils.cpp
 )
+
+# ========================================
+# 5. 生成动态库
+# ========================================
+
+add_library(face_engine SHARED ${SOURCES})
+
+# ========================================
+# 6. 链接库
+# ========================================
+
+target_link_libraries(face_engine
+    # RKNN 运行时库
+    rknnrt
+
+    # OpenCV 静态库
+    ${OpenCV_LIBS}
+
+    # utils 子项目生成的静态库
+    fileutils
+    imageutils
+)
+
+# ========================================
+# 7. 安装目标
+# ========================================
+
+install(TARGETS face_engine DESTINATION lib)
