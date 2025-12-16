@@ -45,13 +45,21 @@ face_detection/
 ## 已实现的模块
 
 ✅ **face_utils.h** - 所有数据结构和函数声明
+
 ✅ **face_aligner.cpp** - 人脸对齐（cv::warpAffine）
+
 ✅ **mobilefacenet.cpp** - MobileFaceNet RKNN 推理
+
 ✅ **retinaface.cpp** - RetinaFace 人脸检测（已修复类型不匹配）
+
 ✅ **face_engine.cpp** - 主引擎（整合检测+对齐+识别）
+
 ✅ **utils.cpp** - 工具函数（文件读取、余弦相似度）
+
 ✅ **utils/** - rknn_model_zoo 工具库（子项目，静态库）
+
 ✅ **test_api.py** - Python ctypes 测试脚本
+
 ✅ **CMakeLists.txt** - 编译配置（OpenCV 静态库 + find_package + add_subdirectory）
 
 ---

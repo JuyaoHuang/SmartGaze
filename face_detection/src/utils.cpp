@@ -4,49 +4,7 @@
 #include <string.h>
 #include <math.h>
 
-/**
- * @brief 从文件读取数据
- */
-int read_data_from_file(const char *filename, char **data) {
-    if (!filename || !data) {
-        return -1;
-    }
-
-    FILE *fp = fopen(filename, "rb");
-    if (!fp) {
-        printf("[utils] Error: Cannot open file %s\n", filename);
-        return -1;
-    }
-
-    // 获取文件大小
-    fseek(fp, 0, SEEK_END);
-    int size = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-
-    if (size <= 0) {
-        fclose(fp);
-        return -1;
-    }
-
-    // 分配内存
-    *data = (char *)malloc(size);
-    if (!*data) {
-        fclose(fp);
-        return -1;
-    }
-
-    // 读取数据
-    size_t read_size = fread(*data, 1, size, fp);
-    fclose(fp);
-
-    if (read_size != (size_t)size) {
-        free(*data);
-        *data = NULL;
-        return -1;
-    }
-
-    return size;
-}
+// read_data_from_file 已在 utils/file_utils.c 中定义，此处不再重复
 
 /**
  * @brief 计算余弦相似度

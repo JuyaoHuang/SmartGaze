@@ -140,6 +140,7 @@ public:
 
 //! @} core_utils
 
+//! @endcond
 
 //! @addtogroup core_basic
 //! @{

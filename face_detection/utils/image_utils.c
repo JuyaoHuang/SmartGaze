@@ -9,13 +9,16 @@
 #include "drmrga.h"
 #endif
 
+// 将 stb_image 函数声明为 static，避免符号导出，防止与 OpenCV 的 stb_image 冲突
 #define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_STATIC
 #define STBI_NO_THREAD_LOCALS
 #define STBI_ONLY_JPEG
 #define STBI_ONLY_PNG
 #include "stb_image.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_STATIC
 #include "stb_image_write.h"
 
 #include "image_utils.h"

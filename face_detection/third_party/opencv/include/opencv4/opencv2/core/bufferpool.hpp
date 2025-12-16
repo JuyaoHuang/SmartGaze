@@ -15,7 +15,7 @@
 namespace cv
 {
 
-//! @addtogroup core_opencl
+//! @addtogroup core
 //! @{
 
 class BufferPoolController

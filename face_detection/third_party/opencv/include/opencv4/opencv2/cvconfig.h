@@ -72,14 +72,11 @@
 /* #undef HAVE_OPENJPEG */
 /* #undef HAVE_JASPER */
 
-/* AVIF codec */
-/* #undef HAVE_AVIF */
-
 /* IJG JPEG codec */
 /* #undef HAVE_JPEG */
 
-/* JPEG XL codec */
-/* #undef HAVE_JPEGXL */
+/* libpng/png.h needs to be included */
+/* #undef HAVE_LIBPNG_PNG_H */
 
 /* GDCM DICOM codec */
 /* #undef HAVE_GDCM */
@@ -108,9 +105,6 @@
 
 /* PNG codec */
 /* #undef HAVE_PNG */
-
-/* PNG codec */
-/* #undef HAVE_SPNG */
 
 /* Posix threads (pthreads) */
 #define HAVE_PTHREAD

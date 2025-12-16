@@ -51,7 +51,7 @@
 namespace cv
 {
 
-//! @addtogroup core_eigen
+//! @addtogroup core
 //! @{
 
     /** @brief Affine transform
