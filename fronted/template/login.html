@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}用户登录{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center min-vh-50">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-primary text-white text-center py-4">
+                <h3 class="mb-0">
+                    <i class="bi bi-person-badge me-2"></i>管理员登录
+                </h3>
+            </div>
+            <div class="card-body p-4">
+                <form id="loginForm">
+                    <div class="mb-4">
+                        <label for="username" class="form-label fw-semibold">
+                            <i class="bi bi-person me-1"></i>账号
+                        </label>
+                        <input type="text" 
+                               class="form-control form-control-lg" 
+                               id="username" 
+                               name="username" 
+                               placeholder="请输入管理员账号"
+                               required
+                               autofocus>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="password" class="form-label fw-semibold">
+                            <i class="bi bi-key me-1"></i>密码
+                        </label>
+                        <input type="password" 
+                               class="form-control form-control-lg" 
+                               id="password" 
+                               name="password" 
+                               placeholder="请输入密码"
+                               required>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>登录系统
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="card-footer text-center text-muted py-3">
+                <small>默认账号: admin | 密码: admin123</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        
+        // 显示加载状态
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>登录中...';
+        submitBtn.disabled = true;
+        
+        const formData = {
+            username: document.getElementById('username').value,
+            password: document.getElementById('password').value
+        };
+        
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                showAlert('登录成功！正在跳转...', 'success');
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 1000);
+            } else {
+                showAlert(data.msg || '登录失败', 'danger');
+            }
+        } catch (error) {
+            showAlert('网络连接错误: ' + error.message, 'danger');
+        } finally {
+            // 恢复按钮
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+    
+    // 按Enter键提交
+    document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+            document.getElementById('loginForm').requestSubmit();
+        }
+    });
+</script>
+{% endblock %}

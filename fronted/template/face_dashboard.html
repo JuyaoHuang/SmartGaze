@@ -1,0 +1,58 @@
+{% extends "base.html" %} {% block title %}人脸管理{% endblock %} {% block
+content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+    <div class="card shadow">
+      <div class="card-header bg-primary text-white text-center py-3">
+        <h4 class="mb-0">人脸管理面板</h4>
+      </div>
+      <div class="card-body p-4">
+        <!-- 垂直按钮组 -->
+        <div class="d-grid gap-3">
+          <!-- 1. 获取已录入人脸的用户列表 -->
+          <a href="/face_list" class="btn btn-primary btn-lg">
+            <i class="bi bi-list-ul me-2"></i>查看已录入用户列表
+          </a>
+
+          <!-- 2. 重置人脸数据库 -->
+          <button class="btn btn-danger btn-lg" onclick="resetFaceDatabase()">
+            <i class="bi bi-trash me-2"></i>重置人脸数据库
+          </button>
+
+          <!-- 返回按钮 -->
+          <a href="/dashboard" class="btn btn-outline-secondary mt-4">
+            <i class="bi bi-arrow-left me-2"></i>返回控制面板
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  // 重置人脸数据库
+  function resetFaceDatabase() {
+    if (!confirm("确定要清空所有人脸数据吗？此操作不可恢复！")) {
+      return;
+    }
+
+    fetch("/api/face/reset", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "success") {
+          showMessage("success", "人脸数据库已重置成功");
+        } else {
+          showMessage("danger", data.msg || "重置失败");
+        }
+      })
+      .catch((error) => {
+        showMessage("danger", "网络错误，请重试");
+      });
+  }
+</script>
+{% endblock %}

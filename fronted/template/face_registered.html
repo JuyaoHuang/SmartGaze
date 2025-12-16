@@ -1,0 +1,98 @@
+{% extends "base.html" %} {% block title %}已录入用户{% endblock %} {% block
+content %}
+<div class="card shadow">
+  <div
+    class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3"
+  >
+    <h4 class="mb-0">已录入人脸的用户列表</h4>
+    <a href="/face_dashboard" class="btn btn-light btn-sm">
+      <i class="bi bi-arrow-left me-1"></i>返回
+    </a>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>姓名</th>
+            <th>录入时间</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if users and users.length > 0 %} {% for user in users %}
+          <tr id="user-{{ user.id }}">
+            <td>{{ user.id }}</td>
+            <td>{{ user.name }}</td>
+            <td>{{ user.created_at }}</td>
+            <td>
+              <button
+                class="btn btn-sm btn-outline-danger"
+                onclick="deleteUser('{{ user.name }}', {{ user.id }})"
+              >
+                <i class="bi bi-trash"></i> 删除
+              </button>
+            </td>
+          </tr>
+          {% endfor %} {% else %}
+          <tr>
+            <td colspan="4" class="text-center py-4 text-muted">
+              暂无已录入的用户
+            </td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% if users and users.length > 0 %}
+  <div class="card-footer text-muted py-2">共 {{ users|length }} 个用户</div>
+  {% endif %}
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  // 删除指定用户
+  function deleteUser(username, userId) {
+    if (!confirm(`确定要删除用户 "${username}" 的人脸数据吗？`)) {
+      return;
+    }
+
+    fetch(`/api/face/${username}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "success") {
+          // 从表格中移除该行
+          const row = document.getElementById(`user-${userId}`);
+          if (row) {
+            row.remove();
+          }
+          showMessage("success", `用户 "${username}" 已删除成功`);
+
+          // 如果表格为空，显示提示
+          const tbody = document.querySelector("tbody");
+          if (tbody.children.length === 1) {
+            // 只有"暂无数据"行
+            tbody.innerHTML = `
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">
+                                暂无已录入的用户
+                            </td>
+                        </tr>
+                    `;
+          }
+        } else {
+          showMessage("danger", data.msg || "删除失败");
+        }
+      })
+      .catch((error) => {
+        showMessage("danger", "网络错误，请重试");
+      });
+  }
+</script>
+{% endblock %}

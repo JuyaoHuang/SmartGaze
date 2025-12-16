@@ -1,19 +1,140 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智能门禁系统</title>
-    
-    <!-- 引入 Bootstrap CSS (Jinja2 会自动去 /static/css/ 找) -->
-    <link href="{{ url_for('static', path='/css/bootstrap.min.css') }}" rel="stylesheet">
-</head>
-<body>
-    
-    <!-- 您的页面内容 -->
-    {% block content %}{% endblock %}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>智能门禁系统 - {% block title %}{% endblock %}</title>
 
-    <!-- 引入 Bootstrap JS Bundle -->
-    <script src="{{ url_for('static', path='/js/bootstrap.bundle.min.js') }}"></script>
-</body>
+    <!-- Bootstrap CSS -->
+    <link
+      href="{{ url_for('static', path='css/bootstrap.min.css') }}"
+      rel="stylesheet"
+    />
+
+    <!-- 自定义CSS -->
+    <style>
+      :root {
+        --primary-color: #0d6efd;
+        --success-color: #198754;
+        --danger-color: #dc3545;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Microsoft YaHei", sans-serif;
+        background-color: #f8f9fa;
+        min-height: 100vh;
+      }
+
+      .navbar-brand {
+        font-weight: 700;
+      }
+
+      .main-container {
+        min-height: calc(100vh - 120px);
+      }
+
+      .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1.1rem;
+      }
+
+      /* 手机端适配 */
+      @media (max-width: 768px) {
+        .container {
+          padding-left: 15px;
+          padding-right: 15px;
+        }
+      }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+      <div class="container">
+        <a class="navbar-brand" href="/">
+          <i class="bi bi-shield-lock"></i> 智能门禁系统
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            {% block nav_items %}{% endblock %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="main-container py-4">
+      <div class="container">{% block content %}{% endblock %}</div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-3 mt-4">
+      <div class="container text-center">
+        <p class="mb-0">© 2024 智能门禁系统 | RK3568 AP 模式 + FastAPI</p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="{{ url_for('static', path='js/bootstrap.bundle.min.js') }}"></script>
+
+    <!-- 全局JS -->
+    <script>
+      // 显示消息函数
+      function showAlert(message, type = "info") {
+        const alertDiv = document.createElement("div");
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+        alertDiv.style.zIndex = "1050";
+        alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+        document.body.appendChild(alertDiv);
+
+        setTimeout(() => {
+          if (alertDiv.parentNode) alertDiv.remove();
+        }, 3000);
+      }
+
+      // 表单提交通用处理
+      function handleFormSubmit(formId, endpoint, method = "POST") {
+        const form = document.getElementById(formId);
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const formData = new FormData(form);
+          const data = Object.fromEntries(formData);
+
+          try {
+            const response = await fetch(endpoint, {
+              method,
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(data),
+            });
+            const result = await response.json();
+
+            if (result.status === "success") {
+              showAlert(result.msg, "success");
+              form.reset();
+            } else {
+              showAlert(result.msg, "danger");
+            }
+          } catch (error) {
+            showAlert("网络错误: " + error.message, "danger");
+          }
+        });
+      }
+    </script>
+
+    {% block extra_js %}{% endblock %}
+  </body>
 </html>

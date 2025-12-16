@@ -1,0 +1,189 @@
+{% extends "base.html" %} {% block title %}控制面板{% endblock %} {% block
+content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+    <div class="card shadow">
+      <div class="card-header bg-primary text-white text-center py-3">
+        <h4 class="mb-0">主控制面板</h4>
+      </div>
+      <div class="card-body p-4">
+        <!-- 垂直按钮组 -->
+        <div class="d-grid gap-3">
+          <!-- 1. 一键开门 -->
+          <button class="btn btn-success btn-lg" onclick="unlockDoor()">
+            <i class="bi bi-unlock me-2"></i>一键开门
+          </button>
+
+          <!-- 2. 录入人脸 -->
+          <a href="/face_input" class="btn btn-primary btn-lg">
+            <i class="bi bi-camera me-2"></i>录入人脸
+          </a>
+
+          <!-- 3. 人脸管理面板 -->
+          <a href="/face_dashboard" class="btn btn-info btn-lg">
+            <i class="bi bi-people me-2"></i>人脸管理面板
+          </a>
+
+          <!-- 4. 修改登录密码 -->
+          <button
+            class="btn btn-secondary btn-lg"
+            data-bs-toggle="modal"
+            data-bs-target="#changePasswordModal"
+          >
+            <i class="bi bi-key me-2"></i>修改登录密码
+          </button>
+
+          <!-- 5. 添加传统密码（预留） -->
+          <button
+            class="btn btn-outline-secondary btn-lg"
+            onclick="showNotImplemented()"
+          >
+            <i class="bi bi-plus-circle me-2"></i>添加传统密码
+          </button>
+
+          <!-- 6. 重置传统密码（预留） -->
+          <button
+            class="btn btn-outline-secondary btn-lg"
+            onclick="showNotImplemented()"
+          >
+            <i class="bi bi-arrow-clockwise me-2"></i>重置传统密码
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 修改密码模态框 -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">修改登录密码</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form id="passwordForm">
+          <div class="mb-3">
+            <label for="oldPassword" class="form-label">原密码</label>
+            <input
+              type="password"
+              class="form-control"
+              id="oldPassword"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="newPassword" class="form-label">新密码</label>
+            <input
+              type="password"
+              class="form-control"
+              id="newPassword"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="confirmPassword" class="form-label">确认新密码</label>
+            <input
+              type="password"
+              class="form-control"
+              id="confirmPassword"
+              required
+            />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          取消
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          onclick="changePassword()"
+        >
+          确认修改
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  // 一键开门功能
+  function unlockDoor() {
+    fetch("/api/unlock", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "success") {
+          showMessage("success", "正在开门...");
+        } else {
+          showMessage("danger", data.msg || "开门失败");
+        }
+      })
+      .catch((error) => {
+        showMessage("danger", "网络错误，请重试");
+      });
+  }
+
+  // 修改密码功能
+  function changePassword() {
+    const oldPassword = document.getElementById("oldPassword").value;
+    const newPassword = document.getElementById("newPassword").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+
+    if (newPassword !== confirmPassword) {
+      showMessage("danger", "两次输入的新密码不一致");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      showMessage("danger", "密码长度至少6位");
+      return;
+    }
+
+    fetch("/api/change_login_password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        old_password: oldPassword,
+        new_password: newPassword,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "success") {
+          showMessage("success", "密码修改成功");
+          // 关闭模态框
+          const modal = bootstrap.Modal.getInstance(
+            document.getElementById("changePasswordModal")
+          );
+          modal.hide();
+          // 清空表单
+          document.getElementById("passwordForm").reset();
+        } else {
+          showMessage("danger", data.msg || "密码修改失败");
+        }
+      })
+      .catch((error) => {
+        showMessage("danger", "网络错误，请重试");
+      });
+  }
+
+  // 未实现功能提示
+  function showNotImplemented() {
+    showMessage("info", "该功能暂未实现");
+  }
+</script>
+{% endblock %}

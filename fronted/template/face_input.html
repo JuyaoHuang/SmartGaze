@@ -1,0 +1,129 @@
+{% extends "base.html" %} {% block title %}人脸录入{% endblock %} {% block
+extra_css %}
+<style>
+  .video-container {
+    width: 100%;
+    height: 60vh;
+    background-color: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .video-feed {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .controls-container {
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="row">
+  <!-- 视频流区域 (占屏幕2/3) -->
+  <div class="col-12 mb-4">
+    <div class="card shadow">
+      <div class="card-header bg-primary text-white text-center py-2">
+        <h5 class="mb-0">摄像头实时画面</h5>
+      </div>
+      <div class="card-body p-0">
+        <div class="video-container">
+          <img
+            src="/api/video_stream"
+            class="video-feed"
+            alt="摄像头画面"
+            id="videoFeed"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 控制区域 (占屏幕1/3) -->
+  <div class="col-12">
+    <div class="controls-container">
+      <div class="mb-3">
+        <label for="username" class="form-label">用户姓名</label>
+        <input
+          type="text"
+          class="form-control"
+          id="username"
+          placeholder="请输入要录入人脸的姓名"
+          required
+        />
+      </div>
+      <div class="d-grid gap-2">
+        <button class="btn btn-danger btn-lg" onclick="captureFace()">
+          <i class="bi bi-camera me-2"></i>确定录入
+        </button>
+        <a href="/dashboard" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left me-2"></i>返回控制面板
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  // 保持视频流连接
+  const videoFeed = document.getElementById("videoFeed");
+
+  // 每5秒刷新一次图片，避免缓存
+  setInterval(() => {
+    const timestamp = new Date().getTime();
+    videoFeed.src = `/api/video_stream?t=${timestamp}`;
+  }, 5000);
+
+  // 人脸录入功能
+  function captureFace() {
+    const username = document.getElementById("username").value.trim();
+
+    if (!username) {
+      showMessage("warning", "请输入用户姓名");
+      return;
+    }
+
+    // 显示加载状态
+    const captureBtn = document.querySelector("button.btn-danger");
+    const originalText = captureBtn.innerHTML;
+    captureBtn.innerHTML =
+      '<span class="spinner-border spinner-border-sm me-2"></span>正在录入...';
+    captureBtn.disabled = true;
+
+    fetch("/api/face/capture", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username: username }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("网络响应错误");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        if (data.status === "success") {
+          showMessage("success", "人脸录入成功！");
+          document.getElementById("username").value = "";
+        } else {
+          showMessage("danger", data.msg || "人脸录入失败");
+        }
+      })
+      .catch((error) => {
+        showMessage("danger", "网络错误，请重试");
+      })
+      .finally(() => {
+        // 恢复按钮状态
+        captureBtn.innerHTML = originalText;
+        captureBtn.disabled = false;
+      });
+  }
+</script>
+{% endblock %}
