@@ -27,12 +27,12 @@
 ### 核心文档
 | 文档 | 描述 |
 |------|------|
-| [face_detected.md](./docs/face_detected.md) | **⭐️ 项目总览**（架构、部署、使用、后端集成） |
+| [face_detection.md](./docs/face_detection.md) | **⭐️ 项目总览**（架构、部署、使用、后端集成） |
 
 ### 详细技术文档
 | 文档 | 内容 |
 |------|------|
-| [workflow.md](./docs/workflow.md) | 编译运行步骤（VMWare 环境、依赖配置） |
+| [compile_steps.md](./docs/compile_steps.md) | 编译运行步骤（VMWare 环境、依赖配置） |
 | [dataflow.md](./docs/dataflow.md) | 数据流详解（JPEG → 512维向量） |
 | [format_out_in.md](./docs/format_out_in.md) | API 接口规范（C/Python 接口） |
 | [model_function.md](./docs/model_function.md) | 模型功能和作用（RetinaFace + MobileFaceNet） |
@@ -99,7 +99,7 @@ scp build/libface_engine.so root@192.168.1.100:/userdata/face_app/
 scp models/*.rknn root@192.168.1.100:/userdata/face_app/models/
 ```
 
-📖 **详细步骤**: 参考 [workflow.md](./docs/workflow.md)
+📖 **详细步骤**: 参考 [compile_steps.md](./docs/compile_steps.md)
 
 ---
 
