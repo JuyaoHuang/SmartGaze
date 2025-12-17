@@ -4,22 +4,20 @@ from typing import Optional
 import cv2
 
 class Camera:
-    camera = None
+    '''摄像头管理类'''
 
-    '''单例模式'''
-    def __new__(cls, index=0):
-        if cls.camera is None:
-            cls.camera = super().__new__(cls)
-        return cls.camera
-
-    '''初始化函数，打开相机'''
     def __init__(self, index=0):
+        '''初始化函数，打开相机'''
+        # 添加初始化标志，避免单例模式下重复初始化
+        if hasattr(self, '_initialized'):
+            return
+        self._initialized = True
+
         self.index = index
         self.cap = cv2.VideoCapture(index)
         if not self.cap.isOpened():
             raise ValueError(f"Failed to open camera{index}")
         # 初始化移动监测所需的变量
-        self.first_frame = None
         self.motion_contour_threshold = 500  # 轮廓面积阈值，用于判断是否有显著运动
 
     '''析构函数，释放相机资源'''
@@ -41,9 +39,6 @@ class Camera:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         # 应用高斯模糊
         gray = cv2.GaussianBlur(gray, (21, 21), 0)
-        # 初始化第一帧
-        if self.first_frame is None:
-            self.first_frame = gray
 
         # 转换前一帧为灰度并模糊（如果不是灰度图像）
         if len(prevFrame.shape) > 2:

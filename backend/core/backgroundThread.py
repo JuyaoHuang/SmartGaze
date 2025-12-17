@@ -20,10 +20,10 @@ class BackgroundThread(threading.Thread):
         初始化后台线程
         Args:
             check_interval: 检查间隔时间（秒），默认100ms
-            motion_threshold: 移动侦测阈值，默认500
+            motion_threshold: 移动侦测阈值，默认50
             similarity_threshold: 人脸识别相似度阈值，默认0.5
     '''
-    def __init__(self, check_interval=0.1, motion_threshold=500, similarity_threshold=0.5):
+    def __init__(self, check_interval=0.1, motion_threshold=50, similarity_threshold=0.5):
         super().__init__(target=self.run)
         super().__init__()
         self.daemon = True  # 设置为守护线程，主程序退出时自动结束

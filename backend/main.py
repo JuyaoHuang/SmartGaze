@@ -6,6 +6,7 @@ from backend.core.backgroundThread import BackgroundThread
 from backend.core.camera import get_camera
 from backend.core.face_engine import get_face_engine
 from backend.routers import auth, face
+from backend.database.manager import db_manager as db
 
 
 @asynccontextmanager
@@ -20,6 +21,7 @@ async def lifespan(app: FastAPI):
     # 引擎销毁以及摄像头销毁
     print("Application shutting down")
     back.stop()
+    db.close()  # 关闭数据库连接
     del face_engine
     del camera
 
