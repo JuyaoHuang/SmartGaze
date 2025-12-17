@@ -30,7 +30,7 @@ async def capture_face(username: str):
 @router.get("/list")
 async def getList():
     name_list = db_manager.get_face_name_list()
-    return {"status": "success", "list": name_list}
+    return name_list
 
 @router.delete("/{name}")
 async def delete_face(name: str):
