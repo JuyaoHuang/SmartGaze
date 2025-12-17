@@ -25,7 +25,7 @@ class DoorController:
         # 尝试获取锁，如果已被锁定则直接返回
         if not self._door_lock.acquire(blocking=False):
             logging.info("Door is busy")
-            return  # 立即返回，避免执行后续代码
+            return 
 
         try:
             logging.info("Open the door")
