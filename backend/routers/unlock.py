@@ -1,8 +1,9 @@
 import threading
-from fastapi import APIRouter, BackgroundTasks
+from typing import Optional
+from fastapi import APIRouter, BackgroundTasks, Header
 
 from backend.core.doorController import get_door_controller
-from backend.database.manager import db_manager
+from backend.utils.auth import verify_token, extract_token_from_header
 
 router = APIRouter(
     prefix="/api",
@@ -12,25 +13,29 @@ router = APIRouter(
 
 
 @router.post("/unlock")
-async def unlock(username: str, password: str, background_tasks: BackgroundTasks):
+async def unlock(background_tasks: BackgroundTasks, authorization: Optional[str] = Header(None)):
     """管理员远程开门
 
     Args:
-        username: 管理员用户名
-        password: 管理员密码
         background_tasks: FastAPI后台任务
+        authorization: Authorization Header，格式: "Bearer <token>"
 
     Returns:
         成功返回 {"status": "success"}，否则返回错误信息
 
     说明:
-        - 验证管理员身份后，在后台线程中执行开门操作
+        - 验证JWT token后，在后台线程中执行开门操作
         - 立即返回，不阻塞请求（开门操作需要3秒）
     """
-    # 验证管理员身份
-    db_pwd = db_manager.get_administrator(username)
-    if not db_pwd or db_pwd != password:
-        return {"status": "error", "message": "Invalid credentials"}
+    # 从 Header 中提取 token
+    token = extract_token_from_header(authorization)
+    if not token:
+        return {"status": "error", "message": "Missing or invalid authorization header"}
+
+    # 验证 token
+    username = verify_token(token)
+    if not username:
+        return {"status": "error", "message": "Invalid or expired token"}
 
     # 在后台任务中执行开门操作
     def open_door():
