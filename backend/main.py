@@ -5,6 +5,8 @@ from fastapi import FastAPI
 from backend.core.backgroundThread import BackgroundThread
 from backend.core.camera import get_camera
 from backend.core.face_engine import get_face_engine
+from backend.routers import auth
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -23,3 +25,4 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+app.include_router(auth.router)

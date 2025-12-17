@@ -43,7 +43,7 @@ class DatabaseManager:
         self.conn.commit()
         return self.cursor.lastrowid
 
-    def get_administrator(self, username: str) -> Optional[Dict]:
+    def get_administrator(self, username: str) -> str:
         """通过用户名获取管理员信息"""
         self.cursor.execute('''
             SELECT id, username, password
@@ -52,12 +52,24 @@ class DatabaseManager:
         ''', username)
         row = self.cursor.fetchone()
         if row:
-            return {
-                'id': row[0],
-                'username': row[1],
-                'password': row[2]
-            }
-        return None
+            return row[2]
+        return ""
+
+    def update_administrator_password(self, username: str, new_password: str) -> bool:
+        """更新管理员密码"""
+        try:
+            self.cursor.execute('''
+                UPDATE administrators
+                SET password = ?
+                WHERE username = ?
+            ''', (new_password, username))
+            self.conn.commit()
+            return self.cursor.rowcount > 0
+        except Exception as e:
+            print(f"更新管理员密码失败: {e}")
+            return False
+
+
 
     def add_face_feature(self, name: str, feature_vector: np.ndarray) -> int:
         """添加人脸特征向量"""
