@@ -9,7 +9,7 @@ router = APIRouter(
 )
 
 @router.post("/login")
-def login(username: str, password: str):
+async def login(username: str, password: str):
     db_pwd = db_manager.get_administrator(username)
     if db_pwd and db_pwd == password:
         return {"status": "success"}
@@ -17,7 +17,7 @@ def login(username: str, password: str):
         return {"status": "error", "message": "Invalid credentials"}
 
 @router.post("/change_login_password")
-def change_password(username: str, old_password: str, new_password: str):
+async def change_password(username: str, old_password: str, new_password: str):
     db_pwd = db_manager.get_administrator(username)
     if db_pwd and db_pwd == old_password:
         db_manager.update_administrator_password(username, new_password)
