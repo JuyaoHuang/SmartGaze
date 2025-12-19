@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}登录 - 智能门禁系统{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="card login-card">
+        <div class="card-body p-4">
+            <h3 class="card-title text-center mb-4">管理员登录</h3>
+
+            <form id="loginForm">
+                <div class="mb-3">
+                    <label for="username" class="form-label">账号</label>
+                    <input type="text" class="form-control" id="username"
+                           placeholder="请输入账号" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">密码</label>
+                    <input type="password" class="form-control" id="password"
+                           placeholder="请输入密码" required>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">登录</button>
+                </div>
+            </form>
+
+            <div class="text-center mt-3 text-muted">
+                <small>智能门禁系统 v1.0</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 页面加载时检查是否已登录
+    window.addEventListener('DOMContentLoaded', () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            window.location.href = '/dashboard';
+        }
+    });
+
+    // 登录表单提交
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.status === 'success') {
+                // 登录成功，存储Token
+                localStorage.setItem('token', data.token);
+                showAlert('登录成功！', 'success');
+
+                // 跳转到主控制面板
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 500);
+            } else {
+                // 登录失败
+                showAlert(data.msg || '账号或密码错误', 'danger');
+            }
+        } catch (error) {
+            console.error('登录失败:', error);
+            showAlert('网络错误，请检查连接', 'danger');
+        }
+    });
+</script>
+{% endblock %}

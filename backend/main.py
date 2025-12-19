@@ -1,11 +1,13 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from backend.core.backgroundThread import BackgroundThread
 from backend.core.camera import get_camera
 from backend.core.face_engine import get_face_engine
-from backend.routers import auth, face, stream, unlock
+from backend.routers import auth, face, stream, unlock, pages
 from backend.database.manager import db_manager as db
 from backend.config import validate_config, print_config_summary
 
@@ -52,6 +54,13 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+# 配置静态文件服务
+STATIC_DIR = Path(__file__).resolve().parent.parent / "fronted" / "static"
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+# 注册路由
+app.include_router(pages.router)  # 页面路由（放在最前面，确保根路径正确处理）
 app.include_router(auth.router)
 app.include_router(face.router)
 app.include_router(stream.router)

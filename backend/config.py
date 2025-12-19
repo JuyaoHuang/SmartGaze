@@ -19,8 +19,8 @@ BASE_DIR = Path(__file__).resolve().parent
 # 生产环境建议：使用环境变量设置，或者修改为随机生成的强密钥
 # 设置方法：export JWT_SECRET_KEY="your-random-secret-key-here"
 JWT_SECRET_KEY = os.getenv(
-    'JWT_SECRET_KEY',
-    'smart-door-rk3568-secret-key-change-me-in-production'
+    '`JWT_SECRET_KEY`',
+    '123456'
 )
 
 # JWT 加密算法（推荐使用 HS256）

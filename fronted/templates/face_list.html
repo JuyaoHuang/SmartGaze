@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}用户列表 - 智能门禁系统{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <h2 class="text-center my-4">已录入用户列表</h2>
+
+            {% if users and users|length > 0 %}
+            <!-- 用户列表表格 -->
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">姓名</th>
+                            <th scope="col">录入时间</th>
+                            <th scope="col">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        {% for user in users %}
+                        <tr data-username="{{ user.username }}" id="user-row-{{ loop.index }}">
+                            <th scope="row">{{ loop.index }}</th>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.created_at }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-danger"
+                                        data-username="{{ user.username }}"
+                                        onclick="deleteUser(this)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                    </svg>
+                                    删除
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 统计信息 -->
+            <div class="alert alert-info">
+                <strong>总计：</strong>已录入 <span id="totalCount">{{ users|length }}</span> 个用户
+            </div>
+            {% else %}
+            <!-- 空状态 -->
+            <div class="text-center py-5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-inbox text-muted mb-3" viewBox="0 0 16 16">
+                    <path d="M4.98 4a.5.5 0 0 0-.39.188L1.54 8H6a.5.5 0 0 1 .5.5 1.5 1.5 0 1 0 3 0A.5.5 0 0 1 10 8h4.46l-3.05-3.812A.5.5 0 0 0 11.02 4H4.98zm9.954 5H10.45a2.5 2.5 0 0 1-4.9 0H1.066l.32 2.562a.5.5 0 0 0 .497.438h12.234a.5.5 0 0 0 .496-.438L14.933 9zM3.809 3.563A1.5 1.5 0 0 1 4.981 3h6.038a1.5 1.5 0 0 1 1.172.563l3.7 4.625a.5.5 0 0 1 .105.374l-.39 3.124A1.5 1.5 0 0 1 14.117 13H1.883a1.5 1.5 0 0 1-1.489-1.314l-.39-3.124a.5.5 0 0 1 .106-.374l3.7-4.625z"/>
+                </svg>
+                <h4 class="text-muted">暂无用户</h4>
+                <p class="text-muted">还没有录入任何用户</p>
+                <a href="/face_input" class="btn btn-primary mt-3">立即录入</a>
+            </div>
+            {% endif %}
+
+            <!-- 操作按钮 -->
+            <div class="d-grid gap-2 mt-4">
+                <a href="/face_input" class="btn btn-primary btn-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-plus me-2" viewBox="0 0 16 16">
+                        <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H1s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                        <path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z"/>
+                    </svg>
+                    录入新用户
+                </a>
+                <a href="/face_dashboard" class="btn btn-outline-secondary btn-lg">
+                    返回管理面板
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 页面加载时检查登录状态
+    checkAuth();
+
+    // 删除用户
+    async function deleteUser(button) {
+        // 从按钮的 data 属性中获取用户名
+        const username = button.dataset.username;
+
+        // 确认删除
+        const confirmed = confirm(`确定要删除用户 "${username}" 吗？`);
+        if (!confirmed) {
+            return;
+        }
+
+        const token = getToken();
+        if (!token) {
+            showAlert('请先登录', 'warning');
+            window.location.href = '/login';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/face/${encodeURIComponent(username)}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.status === 'success') {
+                showAlert(`用户 "${username}" 已删除`, 'success');
+
+                // 从表格中移除该行（通过按钮找到所在的行）
+                const row = button.closest('tr');
+                if (row) {
+                    row.remove();
+                }
+
+                // 更新统计计数
+                const totalCountElem = document.getElementById('totalCount');
+                if (totalCountElem) {
+                    const currentCount = parseInt(totalCountElem.textContent);
+                    totalCountElem.textContent = currentCount - 1;
+                }
+
+                // 如果没有用户了，刷新页面显示空状态
+                const tableBody = document.getElementById('userTableBody');
+                if (tableBody && tableBody.children.length === 0) {
+                    location.reload();
+                }
+            } else {
+                showAlert(data.msg || '删除失败', 'danger');
+            }
+        } catch (error) {
+            console.error('删除失败:', error);
+            showAlert('网络错误，请检查连接', 'danger');
+        }
+    }
+</script>
+{% endblock %}

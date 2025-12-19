@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}人脸录入 - 智能门禁系统{% endblock %}
+
+{% block extra_css %}
+<style>
+    .video-container {
+        position: relative;
+        width: 100%;
+        max-width: 640px;
+        margin: 0 auto;
+    }
+
+    .video-stream {
+        width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .capture-form {
+        max-width: 500px;
+        margin: 20px auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <h2 class="text-center my-4">人脸录入</h2>
+
+            <!-- 视频流显示区域 (2/3) -->
+            <div class="video-container mb-4">
+                <img src="/api/video_stream" class="video-stream img-fluid rounded shadow" alt="实时视频流">
+            </div>
+
+            <!-- 操作区域 (1/3) -->
+            <div class="capture-form">
+                <div class="card">
+                    <div class="card-body">
+                        <form id="captureForm">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">用户姓名</label>
+                                <input type="text" class="form-control" id="username"
+                                       placeholder="请输入姓名" required>
+                                <div class="form-text">请确保人脸清晰可见</div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-danger btn-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-camera me-2" viewBox="0 0 16 16">
+                                        <path d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1v6zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2z"/>
+                                        <path d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM3 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0z"/>
+                                    </svg>
+                                    确定录入
+                                </button>
+                                <a href="/dashboard" class="btn btn-outline-secondary">
+                                    返回主页
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 使用提示 -->
+                <div class="alert alert-info mt-3">
+                    <strong>提示：</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>请保持正脸对准摄像头</li>
+                        <li>确保光线充足</li>
+                        <li>录入时保持静止</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 页面加载时检查登录状态
+    checkAuth();
+
+    // 人脸录入表单提交
+    document.getElementById('captureForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value.trim();
+        if (!username) {
+            showAlert('请输入用户姓名', 'warning');
+            return;
+        }
+
+        const token = getToken();
+        if (!token) {
+            showAlert('请先登录', 'warning');
+            window.location.href = '/login';
+            return;
+        }
+
+        try {
+            // 显示加载提示
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>正在录入...';
+
+            const response = await fetch('/api/face/capture', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username: username })
+            });
+
+            const data = await response.json();
+
+            // 恢复按钮状态
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+
+            if (response.ok && data.status === 'success') {
+                showAlert(`录入成功！用户: ${username}`, 'success');
+                // 清空输入框
+                document.getElementById('username').value = '';
+            } else {
+                showAlert(data.msg || '录入失败，请重试', 'danger');
+            }
+        } catch (error) {
+            console.error('录入失败:', error);
+            showAlert('网络错误，请检查连接', 'danger');
+
+            // 恢复按钮状态
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    });
+</script>
+{% endblock %}
