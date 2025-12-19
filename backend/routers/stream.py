@@ -2,7 +2,13 @@ from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 import cv2
 
-from backend.core.camera import get_camera
+from backend.config import DEV_MODE
+
+# 根据 DEV_MODE 动态导入
+if DEV_MODE:
+    from backend.core.mock import get_mock_camera as get_camera
+else:
+    from backend.core.camera import get_camera
 
 router = APIRouter(
     prefix="/api",

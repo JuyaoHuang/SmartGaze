@@ -63,8 +63,7 @@ def check_dependencies():
         'jinja2': 'jinja2',
         'opencv-python': 'cv2',
         'PyJWT': 'jwt',
-        'python-multipart': 'multipart',
-        'bcrypt': 'bcrypt'
+        'python-multipart': 'multipart'
     }
 
     missing_packages = []

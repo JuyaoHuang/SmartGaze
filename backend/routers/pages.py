@@ -58,15 +58,15 @@ async def face_dashboard_page(request: Request):
 @router.get("/face_list", response_class=HTMLResponse)
 async def face_list_page(request: Request):
     """用户列表页面"""
-    # 从数据库获取所有用户列表
-    users = db.get_all_users()
+    # 从数据库获取所有用户名列表
+    names = db.get_face_name_list()
 
-    # 格式化用户数据
+    # 格式化用户数据（由于数据库中没有创建时间，使用占位符）
     users_data = []
-    for user in users:
+    for name in names:
         users_data.append({
-            "username": user.get("username", ""),
-            "created_at": user.get("created_at", "未知")
+            "username": name,
+            "created_at": "未记录"  # 数据库中没有存储创建时间
         })
 
     return templates.TemplateResponse("face_list.html", {

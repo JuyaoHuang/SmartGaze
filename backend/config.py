@@ -144,6 +144,12 @@ SERVER_PORT = 8000
 # - False：生产模式，性能更好
 DEBUG_MODE = False
 
+# ==================== 开发模式配置 ====================
+# 开发模式（用于 PC 开发调试，跳过硬件依赖）
+# - True：使用 Mock 模拟摄像头和人脸引擎，不初始化真实硬件
+# - False：正常加载硬件模块（RK3568 生产环境）
+DEV_MODE = True  # PC 开发时设置为 True，部署到 RK3568 时改为 False
+
 # ==================== 日志配置 ====================
 # 日志级别
 # - DEBUG：详细日志（开发调试用）
@@ -208,6 +214,7 @@ def print_config_summary():
     print('\n' + '='*60)
     print('智能门禁系统配置摘要：')
     print('='*60)
+    print(f'运行模式：            {"开发模式 (Mock)" if DEV_MODE else "生产模式 (硬件)"}')
     print(f'摄像头模式：          {CAMERA_MODE}')
     print(f'摄像头索引：          {CAMERA_INDEX}')
     print(f'摄像头分辨率：        {CAMERA_WIDTH}x{CAMERA_HEIGHT} @ {CAMERA_FPS}fps')
@@ -215,8 +222,12 @@ def print_config_summary():
     print(f'移动检测阈值：        {CONTOUR_THRESHOLD} 像素')
     print(f'开门持续时间：        {DOOR_OPEN_DURATION} 秒')
     print(f'服务器地址：          http://{SERVER_HOST}:{SERVER_PORT}')
+    print(f'访问地址：            http://localhost:{SERVER_PORT}')
     print(f'数据库路径：          {DATABASE_PATH}')
     print(f'GPIO 门锁引脚：       {GPIO_DOOR_PIN or "未配置（日志模拟）"}')
+    if DEV_MODE:
+        print('\n[警告] 当前为开发模式，硬件功能将被 Mock 模拟')
+        print('[警告] 部署到 RK3568 前请将 DEV_MODE 改为 False')
     print('='*60 + '\n')
 
 

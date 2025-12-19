@@ -1,8 +1,17 @@
 from fastapi import APIRouter, UploadFile, File
+from pydantic import BaseModel
 import cv2
 
-from backend.core.camera import get_camera
-from backend.core.face_engine import get_face_engine
+from backend.config import DEV_MODE
+
+# 根据 DEV_MODE 动态导入
+if DEV_MODE:
+    from backend.core.mock import get_mock_camera as get_camera
+    from backend.core.mock import get_mock_face_engine as get_face_engine
+else:
+    from backend.core.camera import get_camera
+    from backend.core.face_engine import get_face_engine
+
 from backend.database.manager import db_manager
 
 router = APIRouter(
@@ -11,8 +20,14 @@ router = APIRouter(
     responses = {404: {"description": "Not found"}},
 )
 
+
+# Pydantic 模型定义
+class CaptureRequest(BaseModel):
+    username: str
+
+
 @router.post("/capture")
-async def capture_face(username: str):
+async def capture_face(request: CaptureRequest):
     camera = get_camera()
     face_engine = get_face_engine()
     frame = camera.get_frame()
@@ -28,7 +43,7 @@ async def capture_face(username: str):
     if not faces:
         return {"status": "error", "message": "No face detected"}
     # 保存人脸特征向量
-    if not db_manager.add_face_feature(username, faces):
+    if not db_manager.add_face_feature(request.username, faces):
         return {"status": "error", "message": "Failed to save face feature"}
 
     return {"status": "success"}
