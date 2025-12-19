@@ -52,7 +52,7 @@ lib.FaceEngine_ExtractFeature.argtypes = [
     ctypes.c_void_p,
     ctypes.POINTER(ctypes.c_ubyte),
     ctypes.c_int,
-    ctypes.POINTER(ctypes.c_float)
+    ctypes.POINTER(ctypes.c_float),
 ]
 
 # void FaceEngine_Destroy(void* engine)
@@ -63,12 +63,13 @@ lib.FaceEngine_Destroy.argtypes = [ctypes.c_void_p]
 lib.FaceEngine_CosineSimilarity.restype = ctypes.c_float
 lib.FaceEngine_CosineSimilarity.argtypes = [
     ctypes.POINTER(ctypes.c_float),
-    ctypes.POINTER(ctypes.c_float)
+    ctypes.POINTER(ctypes.c_float),
 ]
 
 # ========================================
 # FaceEngine 类封装
 # ========================================
+
 
 class FaceEngine:
     def __init__(self, retinaface_model, mobilefacenet_model):
@@ -89,8 +90,8 @@ class FaceEngine:
 
         ret = lib.FaceEngine_Init(
             self.engine,
-            retinaface_model.encode('utf-8'),
-            mobilefacenet_model.encode('utf-8')
+            retinaface_model.encode("utf-8"),
+            mobilefacenet_model.encode("utf-8"),
         )
 
         if ret != 0:
@@ -114,7 +115,7 @@ class FaceEngine:
             return None
 
         # 读取 JPEG 文件
-        with open(image_path, 'rb') as f:
+        with open(image_path, "rb") as f:
             jpeg_data = f.read()
 
         # 转换为 ctypes 数组
@@ -127,13 +128,17 @@ class FaceEngine:
 
         # 调用 C++ 函数
         print(f"\nExtracting feature from: {image_path}")
-        ret = lib.FaceEngine_ExtractFeature(self.engine, jpeg_ptr, len(jpeg_data), feature_ptr)
+        ret = lib.FaceEngine_ExtractFeature(
+            self.engine, jpeg_ptr, len(jpeg_data), feature_ptr
+        )
 
         if ret == 0:
             print("✓ Feature extracted successfully")
             print(f"  Feature shape: {feature_512.shape}")
             print(f"  Feature norm: {np.linalg.norm(feature_512):.4f}")
-            print(f"  Feature range: [{feature_512.min():.4f}, {feature_512.max():.4f}]")
+            print(
+                f"  Feature range: [{feature_512.min():.4f}, {feature_512.max():.4f}]"
+            )
             return feature_512
         elif ret == -1:
             print("✗ Error: No face detected in the image")
@@ -168,16 +173,32 @@ class FaceEngine:
             lib.FaceEngine_Destroy(self.engine)
             print("\n✓ FaceEngine destroyed")
 
+
 # ========================================
 # 主函数
 # ========================================
 
+
 def main():
     parser = argparse.ArgumentParser(description="FaceEngine Python Test Script")
-    parser.add_argument('--image', type=str, required=True, help="Input image path (JPEG)")
-    parser.add_argument('--image2', type=str, default=None, help="Second image for comparison (optional)")
-    parser.add_argument('--retinaface', type=str, default=RETINAFACE_MODEL, help="RetinaFace model path")
-    parser.add_argument('--mobilefacenet', type=str, default=MOBILEFACENET_MODEL, help="MobileFaceNet model path")
+    parser.add_argument(
+        "--image", type=str, required=True, help="Input image path (JPEG)"
+    )
+    parser.add_argument(
+        "--image2",
+        type=str,
+        default=None,
+        help="Second image for comparison (optional)",
+    )
+    parser.add_argument(
+        "--retinaface", type=str, default=RETINAFACE_MODEL, help="RetinaFace model path"
+    )
+    parser.add_argument(
+        "--mobilefacenet",
+        type=str,
+        default=MOBILEFACENET_MODEL,
+        help="MobileFaceNet model path",
+    )
 
     args = parser.parse_args()
 
@@ -207,20 +228,23 @@ def main():
         feature2 = engine.extract_feature(args.image2)
         if feature2 is not None:
             similarity = engine.compare_faces(feature1, feature2)
-            print(f"\n{'='*50}")
+            print(f"\n{'=' * 50}")
             print(f"Face Comparison Result:")
             print(f"  Image 1: {args.image}")
             print(f"  Image 2: {args.image2}")
             print(f"  Cosine Similarity: {similarity:.4f}")
-            print(f"  Judgment: {'Same person ✓' if similarity > 0.5 else 'Different person ✗'}")
+            print(
+                f"  Judgment: {'Same person ✓' if similarity > 0.5 else 'Different person ✗'}"
+            )
             print(f"  (Threshold: 0.5 for strict, 0.3 for general)")
-            print(f"{'='*50}")
+            print(f"{'=' * 50}")
     else:
         # 只提取特征，打印前10个值作为示例
         print(f"\nFeature vector (first 10 values):")
         print(f"  {feature1[:10]}")
 
     print("\n✓ Test completed successfully!")
+
 
 if __name__ == "__main__":
     main()

@@ -11,22 +11,23 @@ from backend.config import (
     CAMERA_WIDTH,
     CAMERA_HEIGHT,
     CAMERA_FPS,
-    MOTION_CONTOUR_THRESHOLD
+    MOTION_CONTOUR_THRESHOLD,
 )
 
+
 class Camera:
-    '''摄像头管理类 - 支持 GStreamer 和 OpenCV 双模切换'''
+    """摄像头管理类 - 支持 GStreamer 和 OpenCV 双模切换"""
 
     def __init__(self, index=None, mode=None):
-        '''初始化函数，打开相机
+        """初始化函数，打开相机
 
         Args:
             index: 摄像头设备索引，None 则使用配置文件默认值
             mode: 初始化模式，None 则使用配置文件默认值
                   可选值: 'auto', 'gstreamer', 'opencv'
-        '''
+        """
         # 添加初始化标志，避免单例模式下重复初始化
-        if hasattr(self, '_initialized'):
+        if hasattr(self, "_initialized"):
             return
         self._initialized = True
 
@@ -42,21 +43,21 @@ class Camera:
         self.actual_mode = None  # 记录实际使用的模式
 
         # 根据模式初始化摄像头
-        if mode == 'gstreamer':
+        if mode == "gstreamer":
             # 强制使用 GStreamer 模式
             logging.info(f"[Camera] 强制使用 GStreamer 模式")
             success = self._init_gstreamer(index)
             if not success:
                 raise ValueError(f"Failed to open camera in GStreamer mode")
 
-        elif mode == 'opencv':
+        elif mode == "opencv":
             # 强制使用 OpenCV 模式
             logging.info(f"[Camera] 强制使用 OpenCV 模式")
             success = self._init_opencv(index)
             if not success:
                 raise ValueError(f"Failed to open camera in OpenCV mode")
 
-        elif mode == 'auto':
+        elif mode == "auto":
             # 自动模式：优先 GStreamer，失败则降级到 OpenCV
             logging.info(f"[Camera] 自动模式：优先尝试 GStreamer")
             success = self._init_gstreamer(index)
@@ -69,7 +70,9 @@ class Camera:
                 raise ValueError(f"Failed to open camera in any mode")
 
         else:
-            raise ValueError(f"Invalid camera mode: {mode}. Must be 'auto', 'gstreamer' or 'opencv'")
+            raise ValueError(
+                f"Invalid camera mode: {mode}. Must be 'auto', 'gstreamer' or 'opencv'"
+            )
 
         # 验证摄像头已成功打开
         if self.cap is None or not self.cap.isOpened():
@@ -84,8 +87,12 @@ class Camera:
         logging.info(f"[Camera] Camera opened successfully")
         logging.info(f"[Camera]   Mode:      {self.actual_mode}")
         logging.info(f"[Camera]   Device:    /dev/video{index}")
-        logging.info(f"[Camera]   Requested: {CAMERA_WIDTH}x{CAMERA_HEIGHT} @ {CAMERA_FPS}fps")
-        logging.info(f"[Camera]   Actual:    {actual_width}x{actual_height} @ {actual_fps}fps")
+        logging.info(
+            f"[Camera]   Requested: {CAMERA_WIDTH}x{CAMERA_HEIGHT} @ {CAMERA_FPS}fps"
+        )
+        logging.info(
+            f"[Camera]   Actual:    {actual_width}x{actual_height} @ {actual_fps}fps"
+        )
 
         # 如果实际分辨率与请求不一致，发出警告
         if actual_width != CAMERA_WIDTH or actual_height != CAMERA_HEIGHT:
@@ -114,10 +121,7 @@ class Camera:
         try:
             # 构建 GStreamer 管道字符串
             pipeline = GSTREAMER_PIPELINE.format(
-                index=index,
-                width=CAMERA_WIDTH,
-                height=CAMERA_HEIGHT,
-                fps=CAMERA_FPS
+                index=index, width=CAMERA_WIDTH, height=CAMERA_HEIGHT, fps=CAMERA_FPS
             )
 
             logging.info(f"[Camera] Trying GStreamer pipeline:")
@@ -138,7 +142,7 @@ class Camera:
                 self.cap = None
                 return False
 
-            self.actual_mode = 'gstreamer'
+            self.actual_mode = "gstreamer"
             logging.info(f"[Camera] GStreamer mode initialized successfully")
             return True
 
@@ -193,8 +197,10 @@ class Camera:
 
                 # 成功
                 self.index = idx  # 更新实际使用的索引
-                self.actual_mode = 'opencv'
-                logging.info(f"[Camera] OpenCV mode initialized successfully on /dev/video{idx}")
+                self.actual_mode = "opencv"
+                logging.info(
+                    f"[Camera] OpenCV mode initialized successfully on /dev/video{idx}"
+                )
                 return True
 
             except Exception as e:
@@ -207,12 +213,14 @@ class Camera:
         logging.warning(f"[Camera] OpenCV mode failed on all indices: {indices_to_try}")
         return False
 
-    '''析构函数，释放相机资源'''
+    """析构函数，释放相机资源"""
+
     def __del__(self):
         self.cap.release()
         print(f"Camera{self.index} released")
 
-    '''获取一帧图像'''
+    """获取一帧图像"""
+
     def get_frame(self):
         ret, frame = self.cap.read()
         if not ret:
@@ -220,19 +228,23 @@ class Camera:
             return None
         return frame
 
-    '''获取摄像头信息'''
+    """获取摄像头信息"""
+
     def get_info(self):
         """返回摄像头的详细信息"""
         return {
-            'index': self.index,
-            'mode': self.actual_mode,  # 实际使用的模式
-            'width': self.width,
-            'height': self.height,
-            'fps': self.fps,
-            'backend': self.cap.getBackendName() if hasattr(self.cap, 'getBackendName') else 'unknown'
+            "index": self.index,
+            "mode": self.actual_mode,  # 实际使用的模式
+            "width": self.width,
+            "height": self.height,
+            "fps": self.fps,
+            "backend": self.cap.getBackendName()
+            if hasattr(self.cap, "getBackendName")
+            else "unknown",
         }
 
-    '''移动监测'''
+    """移动监测"""
+
     def detect_motion(self, prevFrame, frame, binary_threshold):
         # 转换为灰度图像
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -254,7 +266,9 @@ class Camera:
         thresh = cv2.dilate(thresh, None, iterations=2)
 
         # 查找轮廓
-        contours, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(
+            thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+        )
 
         # 如果轮廓面积超过阈值，认为检测到运动
         for contour in contours:
@@ -262,7 +276,6 @@ class Camera:
                 return True
 
         return False
-
 
 
 # ========================================
@@ -285,13 +298,13 @@ def get_camera() -> Camera:
     return _camera_instance
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """单元测试：验证 Camera 功能"""
     import numpy as np
 
-    print("="*60)
+    print("=" * 60)
     print("开始测试 Camera")
-    print("="*60)
+    print("=" * 60)
 
     # 测试1: 单例模式
     print("\n[Test 1] 单例模式测试")
@@ -305,16 +318,16 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"[INFO] 摄像头初始化失败（可能没有摄像头硬件）: {e}")
         print("[SKIP] 跳过后续需要硬件的测试")
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("测试完成（部分跳过）")
-        print("="*60)
+        print("=" * 60)
         exit(0)
 
     # 测试2: 初始化标志
     print("\n[Test 2] 初始化标志测试")
     try:
         cam = Camera()
-        if hasattr(cam, '_initialized') and cam._initialized == True:
+        if hasattr(cam, "_initialized") and cam._initialized == True:
             print("[PASS] 初始化标志正确设置")
         else:
             print("[FAIL] 初始化标志未设置")
@@ -377,6 +390,7 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"[FAIL] {type(e).__name__}: {e}")
         import traceback
+
         traceback.print_exc()
 
     # 测试6: 轮廓面积阈值设置
@@ -410,7 +424,7 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"[FAIL] {type(e).__name__}: {e}")
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("测试完成")
-    print("="*60)
+    print("=" * 60)
     print("\n注意：如果没有摄像头硬件，某些测试会失败")

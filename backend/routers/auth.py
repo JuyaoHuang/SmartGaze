@@ -6,9 +6,9 @@ from backend.utils.auth import create_access_token
 from backend.utils.password import verify_password
 
 router = APIRouter(
-    prefix = "/api",
-    tags = ["auth"],
-    responses = {404: {"description": "Not found"}},
+    prefix="/api",
+    tags=["auth"],
+    responses={404: {"description": "Not found"}},
 )
 
 

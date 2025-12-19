@@ -11,7 +11,7 @@ TEMPLATES_PATH = Path(__file__).resolve().parent.parent.parent / "fronted" / "te
 # 创建 Jinja2 模板实例（显式指定 UTF-8 编码，解决 Windows 下的 GBK 编码问题）
 templates = Jinja2Templates(directory=str(TEMPLATES_PATH))
 # 配置 Jinja2 环境使用 UTF-8
-templates.env.globals['encoding'] = 'utf-8'
+templates.env.globals["encoding"] = "utf-8"
 
 router = APIRouter(tags=["pages"])
 
@@ -25,34 +25,31 @@ async def root(request: Request):
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     """登录页面"""
-    return templates.TemplateResponse("login.html", {
-        "request": request,
-        "show_nav": False  # 登录页面不显示导航栏
-    })
+    return templates.TemplateResponse(
+        "login.html",
+        {
+            "request": request,
+            "show_nav": False,  # 登录页面不显示导航栏
+        },
+    )
 
 
 @router.get("/dashboard", response_class=HTMLResponse)
 async def dashboard_page(request: Request):
     """主控制面板"""
-    return templates.TemplateResponse("dashboard.html", {
-        "request": request
-    })
+    return templates.TemplateResponse("dashboard.html", {"request": request})
 
 
 @router.get("/face_input", response_class=HTMLResponse)
 async def face_input_page(request: Request):
     """人脸录入页面"""
-    return templates.TemplateResponse("face_input.html", {
-        "request": request
-    })
+    return templates.TemplateResponse("face_input.html", {"request": request})
 
 
 @router.get("/face_dashboard", response_class=HTMLResponse)
 async def face_dashboard_page(request: Request):
     """人脸管理面板"""
-    return templates.TemplateResponse("face_dashboard.html", {
-        "request": request
-    })
+    return templates.TemplateResponse("face_dashboard.html", {"request": request})
 
 
 @router.get("/face_list", response_class=HTMLResponse)
@@ -64,12 +61,13 @@ async def face_list_page(request: Request):
     # 格式化用户数据（由于数据库中没有创建时间，使用占位符）
     users_data = []
     for name in names:
-        users_data.append({
-            "username": name,
-            "created_at": "未记录"  # 数据库中没有存储创建时间
-        })
+        users_data.append(
+            {
+                "username": name,
+                "created_at": "未记录",  # 数据库中没有存储创建时间
+            }
+        )
 
-    return templates.TemplateResponse("face_list.html", {
-        "request": request,
-        "users": users_data
-    })
+    return templates.TemplateResponse(
+        "face_list.html", {"request": request, "users": users_data}
+    )

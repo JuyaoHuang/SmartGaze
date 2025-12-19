@@ -21,8 +21,8 @@ def create_access_token(username: str) -> str:
     expire = now + timedelta(hours=JWT_EXPIRE_HOURS)
     payload = {
         "sub": username,  # subject - 用户名
-        "exp": expire,    # expiration - 过期时间
-        "iat": now  # issued at - 签发时间
+        "exp": expire,  # expiration - 过期时间
+        "iat": now,  # issued at - 签发时间
     }
     token = jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
     return token

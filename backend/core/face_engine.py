@@ -40,8 +40,12 @@ class FaceEngine:
 
         # 构建路径
         lib_path = project_root / "face_detection" / "build" / "libface_engine.so"
-        retinaface_model = project_root / "face_detection" / "models" / "RetinaFace.rknn"
-        mobilefacenet_model = project_root / "face_detection" / "models" / "mobilefacenet.rknn"
+        retinaface_model = (
+            project_root / "face_detection" / "models" / "RetinaFace.rknn"
+        )
+        mobilefacenet_model = (
+            project_root / "face_detection" / "models" / "mobilefacenet.rknn"
+        )
 
         # 检查文件是否存在
         if not lib_path.exists():
@@ -68,7 +72,11 @@ class FaceEngine:
 
         # int FaceEngine_Init(void* engine, const char* retinaface_model, const char* mobilefacenet_model)
         self.lib.FaceEngine_Init.restype = ctypes.c_int
-        self.lib.FaceEngine_Init.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
+        self.lib.FaceEngine_Init.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_char_p,
+            ctypes.c_char_p,
+        ]
 
         # int FaceEngine_ExtractFeature(void* engine, unsigned char* jpeg_data, int data_len, float* feature_512)
         self.lib.FaceEngine_ExtractFeature.restype = ctypes.c_int
@@ -76,7 +84,7 @@ class FaceEngine:
             ctypes.c_void_p,
             ctypes.POINTER(ctypes.c_ubyte),
             ctypes.c_int,
-            ctypes.POINTER(ctypes.c_float)
+            ctypes.POINTER(ctypes.c_float),
         ]
 
         # void FaceEngine_Destroy(void* engine)
@@ -87,7 +95,7 @@ class FaceEngine:
         self.lib.FaceEngine_CosineSimilarity.restype = ctypes.c_float
         self.lib.FaceEngine_CosineSimilarity.argtypes = [
             ctypes.POINTER(ctypes.c_float),
-            ctypes.POINTER(ctypes.c_float)
+            ctypes.POINTER(ctypes.c_float),
         ]
 
         # ========================================
@@ -106,8 +114,8 @@ class FaceEngine:
 
         ret = self.lib.FaceEngine_Init(
             self.engine_ptr,
-            str(retinaface_model).encode('utf-8'),
-            str(mobilefacenet_model).encode('utf-8')
+            str(retinaface_model).encode("utf-8"),
+            str(mobilefacenet_model).encode("utf-8"),
         )
 
         if ret != 0:
@@ -146,10 +154,7 @@ class FaceEngine:
 
         # 调用 C++ 函数
         ret = self.lib.FaceEngine_ExtractFeature(
-            self.engine_ptr,
-            jpeg_ptr,
-            len(image_bytes),
-            feature_ptr
+            self.engine_ptr, jpeg_ptr, len(image_bytes), feature_ptr
         )
 
         # 处理返回值
@@ -202,7 +207,7 @@ class FaceEngine:
 
     def __del__(self):
         """释放资源（防止内存泄漏）"""
-        if hasattr(self, 'engine_ptr') and self.engine_ptr:
+        if hasattr(self, "engine_ptr") and self.engine_ptr:
             self.lib.FaceEngine_Destroy(self.engine_ptr)
             print("[FaceEngine] Engine destroyed")
 

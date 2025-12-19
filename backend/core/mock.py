@@ -15,8 +15,8 @@ class MockCamera:
         """初始化模拟摄像头"""
         print("[MockCamera] 开发模式：使用模拟摄像头")
         self.index = index
-        self.mode = mode or 'mock'
-        self.actual_mode = 'mock'
+        self.mode = mode or "mock"
+        self.actual_mode = "mock"
         self.width = 640
         self.height = 480
         self.fps = 30
@@ -40,26 +40,43 @@ class MockCamera:
         text_y = (self.height + text_size[1]) // 2
 
         # 绘制文字
-        cv2.putText(frame, text, (text_x, text_y), font, font_scale,
-                    (255, 255, 255), font_thickness, cv2.LINE_AA)
+        cv2.putText(
+            frame,
+            text,
+            (text_x, text_y),
+            font,
+            font_scale,
+            (255, 255, 255),
+            font_thickness,
+            cv2.LINE_AA,
+        )
 
         # 添加时间戳
         import time
+
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-        cv2.putText(frame, timestamp, (20, self.height - 20),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200, 200, 200), 1, cv2.LINE_AA)
+        cv2.putText(
+            frame,
+            timestamp,
+            (20, self.height - 20),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            (200, 200, 200),
+            1,
+            cv2.LINE_AA,
+        )
 
         return frame
 
     def get_info(self):
         """返回摄像头信息"""
         return {
-            'index': self.index,
-            'mode': self.actual_mode,
-            'width': self.width,
-            'height': self.height,
-            'fps': self.fps,
-            'backend': 'mock'
+            "index": self.index,
+            "mode": self.actual_mode,
+            "width": self.width,
+            "height": self.height,
+            "fps": self.fps,
+            "backend": "mock",
         }
 
     def detect_motion(self, prevFrame, frame, binary_threshold):

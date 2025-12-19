@@ -29,22 +29,22 @@ class DatabaseManager:
     def _create_tables(self):
         """创建管理员表和人脸特征表"""
         # 1. 管理员信息表
-        self.cursor.execute('''
+        self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS administrators (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL
             )
-        ''')
+        """)
 
         # 2. 人脸特征向量表
-        self.cursor.execute('''
+        self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS face_features (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 feature_vector BLOB NOT NULL  -- 存储512维特征向量的二进制数据
             )
-        ''')
+        """)
 
         self.conn.commit()
 
@@ -60,20 +60,26 @@ class DatabaseManager:
         """
         # 对密码进行 hash
         hashed_password = hash_password(password)
-        self.cursor.execute('''
+        self.cursor.execute(
+            """
             INSERT INTO administrators (username, password)
             VALUES (?, ?)
-        ''', (username, hashed_password))
+        """,
+            (username, hashed_password),
+        )
         self.conn.commit()
         return self.cursor.lastrowid
 
     def get_administrator(self, username: str) -> str:
         """通过用户名获取管理员信息"""
-        self.cursor.execute('''
+        self.cursor.execute(
+            """
             SELECT id, username, password
             FROM administrators
             WHERE username = ?
-        ''', (username,))
+        """,
+            (username,),
+        )
         row = self.cursor.fetchone()
         if row:
             return row[2]
@@ -92,33 +98,38 @@ class DatabaseManager:
         try:
             # 对新密码进行 hash
             hashed_password = hash_password(new_password)
-            self.cursor.execute('''
+            self.cursor.execute(
+                """
                 UPDATE administrators
                 SET password = ?
                 WHERE username = ?
-            ''', (hashed_password, username))
+            """,
+                (hashed_password, username),
+            )
             self.conn.commit()
             return True
         except Exception as e:
             print(f"更新管理员密码失败: {e}")
             return False
 
-
     def get_face_name_list(self) -> List[str]:
         """获取所有用户名列表"""
-        self.cursor.execute('''
+        self.cursor.execute("""
             SELECT name FROM face_features
-        ''')
+        """)
         rows = self.cursor.fetchall()
         return [row[0] for row in rows]
 
     def delete_face_name(self, name: str) -> bool:
         """删除指定用户名的人脸特征向量"""
         try:
-            self.cursor.execute('''
+            self.cursor.execute(
+                """
                 DELETE FROM face_features
                 WHERE name = ?
-            ''', (name,))
+            """,
+                (name,),
+            )
             self.conn.commit()
             return self.cursor.rowcount > 0
         except Exception as e:
@@ -128,18 +139,18 @@ class DatabaseManager:
     def delete_all_face_names(self) -> bool:
         """删除所有用户名的人脸特征向量"""
         try:
-            self.cursor.execute('''
+            self.cursor.execute("""
                 DELETE FROM face_features
-            ''')
+            """)
             self.conn.commit()
             return True  # 操作成功即返回True，即使删除了0行
         except Exception as e:
             print(f"删除所有人脸特征向量失败: {e}")
             return False
 
-
-
-    def add_face_feature(self, name: str, feature_vector: Union[List[float], np.ndarray]) -> bool:
+    def add_face_feature(
+        self, name: str, feature_vector: Union[List[float], np.ndarray]
+    ) -> bool:
         """添加人脸特征向量
 
         Args:
@@ -160,10 +171,13 @@ class DatabaseManager:
         feature_blob = feature_vector.tobytes()
 
         try:
-            self.cursor.execute('''
+            self.cursor.execute(
+                """
                 INSERT INTO face_features (name, feature_vector)
                 VALUES (?, ?)
-            ''', (name, feature_blob))
+            """,
+                (name, feature_blob),
+            )
             self.conn.commit()
             return True
         except Exception as e:
@@ -172,20 +186,18 @@ class DatabaseManager:
 
     def get_face_features(self) -> List[Dict]:
         """获取所有人脸特征向量"""
-        self.cursor.execute('''
+        self.cursor.execute("""
             SELECT id, name, feature_vector
             FROM face_features
-        ''')
+        """)
         rows = self.cursor.fetchall()
         features = []
         for row in rows:
             # 将二进制数据转换回numpy数组
             feature_vector = np.frombuffer(row[2], dtype=np.float32)
-            features.append({
-                'id': row[0],
-                'name': row[1],
-                'feature_vector': feature_vector
-            })
+            features.append(
+                {"id": row[0], "name": row[1], "feature_vector": feature_vector}
+            )
         return features
 
     def close(self):
@@ -206,23 +218,25 @@ def init_database():
             username=DEFAULT_ADMIN_USERNAME,
             password=DEFAULT_ADMIN_PASSWORD,
         )
-        print(f"默认管理员已创建：用户名={DEFAULT_ADMIN_USERNAME}, 密码={DEFAULT_ADMIN_PASSWORD}")
+        print(
+            f"默认管理员已创建：用户名={DEFAULT_ADMIN_USERNAME}, 密码={DEFAULT_ADMIN_PASSWORD}"
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """单元测试：验证 SQL 参数传递和类型转换"""
     import os
 
     # 使用临时数据库进行测试
-    test_db_path = 'test_db.db'
+    test_db_path = "test_db.db"
 
     # 清理旧的测试数据库
     if os.path.exists(test_db_path):
         os.remove(test_db_path)
 
-    print("="*50)
+    print("=" * 50)
     print("开始测试 DatabaseManager")
-    print("="*50)
+    print("=" * 50)
 
     # 创建测试数据库实例
     test_db = DatabaseManager(db_path=test_db_path)
@@ -230,7 +244,7 @@ if __name__ == '__main__':
     # 测试1: 添加管理员
     print("\n[测试1] 添加管理员")
     try:
-        test_db.add_administrator('testuser', 'testpass')
+        test_db.add_administrator("testuser", "testpass")
         print("添加管理员成功")
     except Exception as e:
         print(f"添加管理员失败: {type(e).__name__}: {e}")
@@ -238,17 +252,19 @@ if __name__ == '__main__':
     # 测试2: 获取管理员 (验证 SQL 参数传递问题)
     print("\n[测试2] 获取管理员 (当前实现)")
     try:
-        password = test_db.get_administrator('testuser')
+        password = test_db.get_administrator("testuser")
         print(f"获取管理员成功: password={password}")
     except Exception as e:
         print(f"获取管理员失败: {type(e).__name__}: {e}")
-        print(f"   原因: execute() 第二个参数应该是元组 (username,) 而不是字符串 username")
+        print(
+            f"   原因: execute() 第二个参数应该是元组 (username,) 而不是字符串 username"
+        )
 
     # 测试3: 添加人脸特征 - 使用 List (模拟 FaceEngine 返回值)
     print("\n[测试3] 添加人脸特征 - 使用 List[float]")
     try:
         feature_list = [0.1] * 512  # 模拟 FaceEngine 返回的 List[float]
-        result = test_db.add_face_feature('张三', feature_list)
+        result = test_db.add_face_feature("张三", feature_list)
         print(f"添加人脸特征成功: {result}")
     except Exception as e:
         print(f"添加人脸特征失败: {type(e).__name__}: {e}")
@@ -258,7 +274,7 @@ if __name__ == '__main__':
     print("\n[测试4] 添加人脸特征 - 使用 numpy.ndarray")
     try:
         feature_array = np.array([0.2] * 512, dtype=np.float32)
-        result = test_db.add_face_feature('李四', feature_array)
+        result = test_db.add_face_feature("李四", feature_array)
         print(f"添加人脸特征成功: {result}")
     except Exception as e:
         print(f"添加人脸特征失败: {type(e).__name__}: {e}")
@@ -274,7 +290,7 @@ if __name__ == '__main__':
     # 测试6: 删除指定人脸 (验证 SQL 参数传递问题)
     print("\n[测试6] 删除指定人脸")
     try:
-        result = test_db.delete_face_name('李四')
+        result = test_db.delete_face_name("李四")
         print(f"删除成功: {result}")
     except Exception as e:
         print(f"删除失败: {type(e).__name__}: {e}")
@@ -293,7 +309,9 @@ if __name__ == '__main__':
     try:
         result = test_db.delete_all_face_names()
         print(f"删除空表返回: {result}")
-        print(f"   说明: 当前实现返回 False (表示空表), 但语义上应该返回 True (操作成功)")
+        print(
+            f"   说明: 当前实现返回 False (表示空表), 但语义上应该返回 True (操作成功)"
+        )
     except Exception as e:
         print(f"删除空表失败: {type(e).__name__}: {e}")
 
@@ -301,6 +319,6 @@ if __name__ == '__main__':
     test_db.close()
     os.remove(test_db_path)
 
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print("测试完成")
-    print("="*50)
+    print("=" * 50)

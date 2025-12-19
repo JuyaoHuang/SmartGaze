@@ -15,9 +15,9 @@ else:
 from backend.database.manager import db_manager
 
 router = APIRouter(
-    prefix = "/api/face",
-    tags = ["face"],
-    responses = {404: {"description": "Not found"}},
+    prefix="/api/face",
+    tags=["face"],
+    responses={404: {"description": "Not found"}},
 )
 
 
@@ -35,7 +35,7 @@ async def capture_face(request: CaptureRequest):
         return {"status": "error", "message": "Failed to capture frame"}
 
     # 将帧编码为 JPEG 字节流（extract_feature 要求输入 bytes）
-    _, img_encoded = cv2.imencode('.jpg', frame)
+    _, img_encoded = cv2.imencode(".jpg", frame)
     img_bytes = img_encoded.tobytes()
 
     # 录入人脸
@@ -48,10 +48,12 @@ async def capture_face(request: CaptureRequest):
 
     return {"status": "success"}
 
+
 @router.get("/list")
 async def getList():
     name_list = db_manager.get_face_name_list()
     return name_list
+
 
 @router.post("/recognize")
 async def recognize_face(file: UploadFile = File(...)):
@@ -87,23 +89,25 @@ async def recognize_face(file: UploadFile = File(...)):
     best_similarity = 0.0
 
     for item in db_results:
-        similarity = face_engine.compute_similarity(features, item['feature_vector'])
+        similarity = face_engine.compute_similarity(features, item["feature_vector"])
         if similarity > best_similarity:
             best_similarity = similarity
-            best_match = item['name']
+            best_match = item["name"]
 
     # 返回识别结果（不设阈值，返回最佳匹配）
     return {
         "status": "success",
         "name": best_match,
-        "similarity": round(best_similarity, 4)
+        "similarity": round(best_similarity, 4),
     }
+
 
 @router.delete("/reset")
 async def delete_all_faces():
     if not db_manager.delete_all_face_names():
         return {"status": "error", "message": "Failed to delete all face names"}
     return {"status": "success"}
+
 
 @router.delete("/{name}")
 async def delete_face(name: str):

@@ -12,31 +12,49 @@ from backend.config import (
     CHECK_INTERVAL,
     BINARY_THRESHOLD,
     CONTOUR_THRESHOLD,
-    SIMILARITY_THRESHOLD
+    SIMILARITY_THRESHOLD,
 )
 
-'''
+"""
     后台线程，用于持续读取摄像头帧处理日常任务
-'''
-class BackgroundThread(threading.Thread):
+"""
 
-    '''
-        初始化后台线程
-        Args:
-            check_interval: 检查间隔时间（秒），默认从配置文件读取
-            binary_threshold: 二值化阈值，用于帧差检测，默认从配置文件读取
-            contour_threshold: 轮廓面积阈值，过滤小运动，默认从配置文件读取
-            similarity_threshold: 人脸识别相似度阈值，默认从配置文件读取
-    '''
-    def __init__(self, check_interval=None, binary_threshold=None, contour_threshold=None, similarity_threshold=None):
+
+class BackgroundThread(threading.Thread):
+    """
+    初始化后台线程
+    Args:
+        check_interval: 检查间隔时间（秒），默认从配置文件读取
+        binary_threshold: 二值化阈值，用于帧差检测，默认从配置文件读取
+        contour_threshold: 轮廓面积阈值，过滤小运动，默认从配置文件读取
+        similarity_threshold: 人脸识别相似度阈值，默认从配置文件读取
+    """
+
+    def __init__(
+        self,
+        check_interval=None,
+        binary_threshold=None,
+        contour_threshold=None,
+        similarity_threshold=None,
+    ):
         super().__init__(target=self.run)
         self.daemon = True  # 设置为守护线程，主程序退出时自动结束
 
         # 使用配置文件中的值作为默认值
-        self.check_interval = check_interval if check_interval is not None else CHECK_INTERVAL
-        self.binary_threshold = binary_threshold if binary_threshold is not None else BINARY_THRESHOLD
-        self.contour_threshold = contour_threshold if contour_threshold is not None else CONTOUR_THRESHOLD
-        self.similarity_threshold = similarity_threshold if similarity_threshold is not None else SIMILARITY_THRESHOLD
+        self.check_interval = (
+            check_interval if check_interval is not None else CHECK_INTERVAL
+        )
+        self.binary_threshold = (
+            binary_threshold if binary_threshold is not None else BINARY_THRESHOLD
+        )
+        self.contour_threshold = (
+            contour_threshold if contour_threshold is not None else CONTOUR_THRESHOLD
+        )
+        self.similarity_threshold = (
+            similarity_threshold
+            if similarity_threshold is not None
+            else SIMILARITY_THRESHOLD
+        )
 
         self.running = False  # 线程运行状态标志
         # 使用全局 db_manager 实例，避免创建多个数据库连接
@@ -79,7 +97,7 @@ class BackgroundThread(threading.Thread):
                 logging.info("Move!")
 
                 # 使用 cv2.imencode 将帧转为 Bytes (模拟图片文件)
-                _, img_encoded = cv2.imencode('.jpg', frame)
+                _, img_encoded = cv2.imencode(".jpg", frame)
                 img_bytes = img_encoded.tobytes()
 
                 # 调用 face_engine 进行人脸识别获得512维特征向量
@@ -94,7 +112,9 @@ class BackgroundThread(threading.Thread):
 
                     # 遍历数据库中的每个人脸特征，计算相似度
                     for item in db_results:
-                        sim = face_engine.compute_similarity(results, item['feature_vector'])
+                        sim = face_engine.compute_similarity(
+                            results, item["feature_vector"]
+                        )
                         # 若为已知人脸相似度大于阈值，记录日志并且开锁
                         if sim > self.similarity_threshold:
                             logging.info(f"识别到 {item['name']}, 相似度: {sim:.4f}")

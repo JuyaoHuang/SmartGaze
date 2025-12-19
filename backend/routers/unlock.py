@@ -13,7 +13,9 @@ router = APIRouter(
 
 
 @router.post("/unlock")
-async def unlock(background_tasks: BackgroundTasks, authorization: Optional[str] = Header(None)):
+async def unlock(
+    background_tasks: BackgroundTasks, authorization: Optional[str] = Header(None)
+):
     """管理员远程开门
 
     Args:

@@ -19,27 +19,23 @@ import os
 from pathlib import Path
 
 # 设置默认编码为 UTF-8（解决 Windows 下的 GBK 编码问题）
-if sys.platform == 'win32':
+if sys.platform == "win32":
     import locale
+
     # 设置标准输出为 UTF-8
-    if sys.stdout.encoding != 'utf-8':
-        sys.stdout.reconfigure(encoding='utf-8')
-    if sys.stderr.encoding != 'utf-8':
-        sys.stderr.reconfigure(encoding='utf-8')
+    if sys.stdout.encoding != "utf-8":
+        sys.stdout.reconfigure(encoding="utf-8")
+    if sys.stderr.encoding != "utf-8":
+        sys.stderr.reconfigure(encoding="utf-8")
     # 设置文件系统编码
-    os.environ['PYTHONIOENCODING'] = 'utf-8'
+    os.environ["PYTHONIOENCODING"] = "utf-8"
 
 # 添加项目根目录到 Python 路径
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 import uvicorn
-from backend.config import (
-    SERVER_HOST,
-    SERVER_PORT,
-    DEBUG_MODE,
-    LOG_LEVEL
-)
+from backend.config import SERVER_HOST, SERVER_PORT, DEBUG_MODE, LOG_LEVEL
 
 
 def print_startup_banner():
@@ -58,12 +54,12 @@ def check_dependencies():
     """检查必要的依赖是否安装"""
     # 包名映射：pip包名 -> 导入名
     package_mapping = {
-        'fastapi': 'fastapi',
-        'uvicorn': 'uvicorn',
-        'jinja2': 'jinja2',
-        'opencv-python': 'cv2',
-        'PyJWT': 'jwt',
-        'python-multipart': 'multipart'
+        "fastapi": "fastapi",
+        "uvicorn": "uvicorn",
+        "jinja2": "jinja2",
+        "opencv-python": "cv2",
+        "PyJWT": "jwt",
+        "python-multipart": "multipart",
     }
 
     missing_packages = []
@@ -100,7 +96,7 @@ def main():
             port=SERVER_PORT,
             reload=DEBUG_MODE,  # 调试模式下启用自动重载
             log_level=LOG_LEVEL.lower(),
-            access_log=True
+            access_log=True,
         )
     except KeyboardInterrupt:
         print("\n\n[INFO] 服务已停止")

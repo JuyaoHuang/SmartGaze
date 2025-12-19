@@ -7,12 +7,12 @@ from backend.config import DOOR_OPEN_DURATION
 
 
 class DoorController:
-    '''门控制器类'''
+    """门控制器类"""
 
     def __init__(self, status: bool = False):
-        '''初始化门控制器'''
+        """初始化门控制器"""
         # 添加初始化标志，避免单例模式下重复初始化
-        if hasattr(self, '_initialized'):
+        if hasattr(self, "_initialized"):
             return
         self._initialized = True
 
@@ -45,6 +45,8 @@ class DoorController:
         finally:
             # 确保无论是否发生异常，都能释放锁
             self._door_lock.release()
+
+
 # ========================================
 # 全局单例实例（供 FastAPI 使用）
 # ========================================
@@ -65,14 +67,14 @@ def get_door_controller() -> DoorController:
     return _door_controller_instance
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """单元测试：验证 DoorController 功能"""
     import threading
     import time
 
-    print("="*60)
+    print("=" * 60)
     print("开始测试 DoorController")
-    print("="*60)
+    print("=" * 60)
 
     # 测试1: 单例模式
     print("\n[Test 1] 单例模式测试")
@@ -131,7 +133,7 @@ if __name__ == '__main__':
             start = time.time()
             door.open()
             elapsed = time.time() - start
-            results.append({'task_id': task_id, 'elapsed': elapsed})
+            results.append({"task_id": task_id, "elapsed": elapsed})
             print(f"  线程{task_id}: 完成（耗时: {elapsed:.2f}秒）")
 
         # 创建3个线程同时开门
@@ -151,8 +153,8 @@ if __name__ == '__main__':
 
         # 分析结果
         print("\n结果分析:")
-        long_tasks = [r for r in results if r['elapsed'] >= 3.0]
-        short_tasks = [r for r in results if r['elapsed'] < 0.1]
+        long_tasks = [r for r in results if r["elapsed"] >= 3.0]
+        short_tasks = [r for r in results if r["elapsed"] < 0.1]
 
         print(f"  执行完整操作的线程: {len(long_tasks)} 个")
         print(f"  被阻塞返回的线程: {len(short_tasks)} 个")
@@ -165,6 +167,7 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"[FAIL] {type(e).__name__}: {e}")
         import traceback
+
         traceback.print_exc()
 
     # 测试5: 锁释放测试
@@ -187,6 +190,6 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"[FAIL] {type(e).__name__}: {e}")
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("测试完成")
-    print("="*60)
+    print("=" * 60)

@@ -18,40 +18,34 @@ BASE_DIR = Path(__file__).resolve().parent
 # JWT 密钥（用于签名和验证 Token）
 # 生产环境建议：使用环境变量设置，或者修改为随机生成的强密钥
 # 设置方法：export JWT_SECRET_KEY="your-random-secret-key-here"
-JWT_SECRET_KEY = os.getenv(
-    '`JWT_SECRET_KEY`',
-    '123456'
-)
+JWT_SECRET_KEY = os.getenv("`JWT_SECRET_KEY`", "123456")
 
 # JWT 加密算法（推荐使用 HS256）
-JWT_ALGORITHM = 'HS256'
+JWT_ALGORITHM = "HS256"
 
 # Token 有效期（小时）
 JWT_EXPIRE_HOURS = 24
 
 # ==================== 数据库配置 ====================
 # SQLite 数据库文件路径
-DATABASE_PATH = os.getenv(
-    'DATABASE_PATH',
-    str(BASE_DIR / 'database' / 'database.db')
-)
+DATABASE_PATH = os.getenv("DATABASE_PATH", str(BASE_DIR / "database" / "database.db"))
 
 # 默认管理员账号（首次启动时自动创建）
-DEFAULT_ADMIN_USERNAME = 'admin'
-DEFAULT_ADMIN_PASSWORD = '123456'
+DEFAULT_ADMIN_USERNAME = "admin"
+DEFAULT_ADMIN_PASSWORD = "123456"
 
 # ==================== 摄像头配置 ====================
 # 摄像头设备索引
 # - 0: 默认摄像头（OV5695 通常是 /dev/video0）
 # - 如果有多个摄像头，可以设置为 1, 2, 3...
 # - RK3568 上可能需要尝试不同索引（0, 1, 11, 21）
-CAMERA_INDEX = int(os.getenv('CAMERA_INDEX', '0'))
+CAMERA_INDEX = int(os.getenv("CAMERA_INDEX", "0"))
 
 # 摄像头初始化模式（重要配置）
 # - 'auto': 自动模式（推荐）- 优先尝试 gstreamer，失败则降级到 opencv
 # - 'gstreamer': 强制使用 GStreamer 硬件加速管道（RK3568 专用，性能最佳）
 # - 'opencv': 强制使用标准 OpenCV V4L2（通用模式，兼容性最好）
-CAMERA_MODE = 'auto'  # 可选值: 'auto', 'gstreamer', 'opencv'
+CAMERA_MODE = "auto"  # 可选值: 'auto', 'gstreamer', 'opencv'
 
 # GStreamer 管道配置（仅在 gstreamer 模式下使用）
 # - 适用于 RK3568 + OV5695 硬件加速
@@ -73,7 +67,7 @@ CAMERA_FALLBACK_INDICES = [0, 1, 11, 21]
 # - 可选配置：1280x720 (HD) - 更清晰，但占用更多资源
 # - GStreamer 模式：支持 1920x1080（硬件加速，CPU占用低）
 # - OpenCV 模式：建议 640x480（软解码，降低CPU负担）
-CAMERA_WIDTH = 640   # 宽度（像素）
+CAMERA_WIDTH = 640  # 宽度（像素）
 CAMERA_HEIGHT = 480  # 高度（像素）
 
 # 摄像头帧率配置
@@ -134,7 +128,7 @@ GPIO_LED_PIN = None  # 示例：27
 # 监听地址
 # - '0.0.0.0'：允许外部访问（手机通过 Wi-Fi 连接）
 # - '127.0.0.1'：仅本机访问
-SERVER_HOST = '0.0.0.0'
+SERVER_HOST = "0.0.0.0"
 
 # 监听端口
 SERVER_PORT = 8000
@@ -156,11 +150,11 @@ DEV_MODE = True  # PC 开发时设置为 True，部署到 RK3568 时改为 False
 # - INFO：一般信息（推荐）
 # - WARNING：警告信息
 # - ERROR：错误信息
-LOG_LEVEL = 'INFO'
+LOG_LEVEL = "INFO"
 
 # 是否输出到文件
 LOG_TO_FILE = False
-LOG_FILE_PATH = str(BASE_DIR / 'logs' / 'smart_door.log')
+LOG_FILE_PATH = str(BASE_DIR / "logs" / "smart_door.log")
 
 # ==================== 性能优化配置 ====================
 # 视频流编码质量（JPEG 压缩质量：1-100）
@@ -174,66 +168,73 @@ VIDEO_STREAM_QUALITY = 70
 # - 通常保持 None 即可
 VIDEO_STREAM_RESOLUTION = None
 
+
 # ==================== 配置验证 ====================
 def validate_config():
     """验证配置的合理性，启动时调用"""
     issues = []
 
     # 检查 JWT 密钥是否修改
-    if JWT_SECRET_KEY == 'smart-door-rk3568-secret-key-change-me-in-production':
-        issues.append('[WARN] JWT_SECRET_KEY 使用默认值，生产环境建议修改')
+    if JWT_SECRET_KEY == "smart-door-rk3568-secret-key-change-me-in-production":
+        issues.append("[WARN] JWT_SECRET_KEY 使用默认值，生产环境建议修改")
 
     # 检查相似度阈值范围
     if not (0.0 <= SIMILARITY_THRESHOLD <= 1.0):
-        issues.append(f'[ERROR] SIMILARITY_THRESHOLD={SIMILARITY_THRESHOLD} 超出范围 [0.0, 1.0]')
+        issues.append(
+            f"[ERROR] SIMILARITY_THRESHOLD={SIMILARITY_THRESHOLD} 超出范围 [0.0, 1.0]"
+        )
 
     # 检查相似度阈值是否过低（安全风险）
     if SIMILARITY_THRESHOLD < 0.5:
-        issues.append(f'[WARN] SIMILARITY_THRESHOLD={SIMILARITY_THRESHOLD} 过低，可能导致误识别')
+        issues.append(
+            f"[WARN] SIMILARITY_THRESHOLD={SIMILARITY_THRESHOLD} 过低，可能导致误识别"
+        )
 
     # 检查数据库路径
     db_dir = Path(DATABASE_PATH).parent
     if not db_dir.exists():
-        issues.append(f'[INFO] 数据库目录不存在，将自动创建：{db_dir}')
+        issues.append(f"[INFO] 数据库目录不存在，将自动创建：{db_dir}")
         db_dir.mkdir(parents=True, exist_ok=True)
 
     # 输出验证结果
     if issues:
-        print('\n' + '='*60)
-        print('配置验证结果：')
+        print("\n" + "=" * 60)
+        print("配置验证结果：")
         for issue in issues:
-            print(f'  {issue}')
-        print('='*60 + '\n')
+            print(f"  {issue}")
+        print("=" * 60 + "\n")
 
-    return len([i for i in issues if i.startswith('[ERROR]')]) == 0  # 返回是否有错误
+    return len([i for i in issues if i.startswith("[ERROR]")]) == 0  # 返回是否有错误
 
 
 # ==================== 配置摘要 ====================
 def print_config_summary():
     """打印配置摘要（启动时调用，便于调试）"""
-    print('\n' + '='*60)
-    print('智能门禁系统配置摘要：')
-    print('='*60)
-    print(f'运行模式：            {"开发模式 (Mock)" if DEV_MODE else "生产模式 (硬件)"}')
-    print(f'摄像头模式：          {CAMERA_MODE}')
-    print(f'摄像头索引：          {CAMERA_INDEX}')
-    print(f'摄像头分辨率：        {CAMERA_WIDTH}x{CAMERA_HEIGHT} @ {CAMERA_FPS}fps')
-    print(f'人脸相似度阈值：      {SIMILARITY_THRESHOLD}')
-    print(f'移动检测阈值：        {CONTOUR_THRESHOLD} 像素')
-    print(f'开门持续时间：        {DOOR_OPEN_DURATION} 秒')
-    print(f'服务器地址：          http://{SERVER_HOST}:{SERVER_PORT}')
-    print(f'访问地址：            http://localhost:{SERVER_PORT}')
-    print(f'数据库路径：          {DATABASE_PATH}')
-    print(f'GPIO 门锁引脚：       {GPIO_DOOR_PIN or "未配置（日志模拟）"}')
+    print("\n" + "=" * 60)
+    print("智能门禁系统配置摘要：")
+    print("=" * 60)
+    print(
+        f"运行模式：            {'开发模式 (Mock)' if DEV_MODE else '生产模式 (硬件)'}"
+    )
+    print(f"摄像头模式：          {CAMERA_MODE}")
+    print(f"摄像头索引：          {CAMERA_INDEX}")
+    print(f"摄像头分辨率：        {CAMERA_WIDTH}x{CAMERA_HEIGHT} @ {CAMERA_FPS}fps")
+    print(f"人脸相似度阈值：      {SIMILARITY_THRESHOLD}")
+    print(f"移动检测阈值：        {CONTOUR_THRESHOLD} 像素")
+    print(f"开门持续时间：        {DOOR_OPEN_DURATION} 秒")
+    print(f"服务器地址：          http://{SERVER_HOST}:{SERVER_PORT}")
+    print(f"访问地址：            http://localhost:{SERVER_PORT}")
+    print(f"数据库路径：          {DATABASE_PATH}")
+    print(f"GPIO 门锁引脚：       {GPIO_DOOR_PIN or '未配置（日志模拟）'}")
     if DEV_MODE:
-        print('\n[警告] 当前为开发模式，硬件功能将被 Mock 模拟')
-        print('[警告] 部署到 RK3568 前请将 DEV_MODE 改为 False')
-    print('='*60 + '\n')
+        print("\n[警告] 当前为开发模式，硬件功能将被 Mock 模拟")
+        print("[警告] 部署到 RK3568 前请将 DEV_MODE 改为 False")
+    print("=" * 60 + "\n")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """测试配置文件"""
-    print('测试配置文件加载...\n')
+    print("测试配置文件加载...\n")
 
     # 验证配置
     is_valid = validate_config()
@@ -242,12 +243,12 @@ if __name__ == '__main__':
     print_config_summary()
 
     # 测试环境变量覆盖
-    print('测试环境变量覆盖：')
-    print(f'  JWT_SECRET_KEY: {JWT_SECRET_KEY[:20]}...')
-    print(f'  CAMERA_INDEX: {CAMERA_INDEX}')
-    print(f'  SIMILARITY_THRESHOLD: {SIMILARITY_THRESHOLD}')
+    print("测试环境变量覆盖：")
+    print(f"  JWT_SECRET_KEY: {JWT_SECRET_KEY[:20]}...")
+    print(f"  CAMERA_INDEX: {CAMERA_INDEX}")
+    print(f"  SIMILARITY_THRESHOLD: {SIMILARITY_THRESHOLD}")
 
     if is_valid:
-        print('\n[OK] 配置验证通过')
+        print("\n[OK] 配置验证通过")
     else:
-        print('\n[ERROR] 配置存在错误，请检查')
+        print("\n[ERROR] 配置存在错误，请检查")

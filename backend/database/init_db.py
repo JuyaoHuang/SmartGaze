@@ -20,7 +20,7 @@ def main():
     print("=" * 60)
 
     # 数据库文件路径（在 backend/database/ 目录下）
-    db_path = os.path.join(current_dir, 'database.db')
+    db_path = os.path.join(current_dir, "database.db")
 
     # 检查并删除旧数据库
     if os.path.exists(db_path):
@@ -46,5 +46,5 @@ def main():
     print("=" * 60)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

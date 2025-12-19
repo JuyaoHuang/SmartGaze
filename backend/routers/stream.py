@@ -29,7 +29,7 @@ async def stream():
                 continue
 
             # 2. 将帧编码为 JPG 格式
-            ret, buffer = cv2.imencode('.jpg', frame)
+            ret, buffer = cv2.imencode(".jpg", frame)
             if not ret:
                 continue
 
@@ -37,11 +37,11 @@ async def stream():
             frame_bytes = buffer.tobytes()
 
             # 4. 构建 HTTP multipart/x-mixed-replace 响应
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+            yield (
+                b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + frame_bytes + b"\r\n"
+            )
 
     # 返回流式响应
     return StreamingResponse(
-        generate_frames(),
-        media_type="multipart/x-mixed-replace; boundary=frame"
+        generate_frames(), media_type="multipart/x-mixed-replace; boundary=frame"
     )

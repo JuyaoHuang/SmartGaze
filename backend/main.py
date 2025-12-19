@@ -13,6 +13,7 @@ if DEV_MODE:
     print("[INFO] 开发模式：使用 Mock 模拟硬件")
     from backend.core.mock import get_mock_camera as get_camera
     from backend.core.mock import get_mock_face_engine as get_face_engine
+
     # 开发模式下不使用后台线程
     BackgroundThread = None
 else:
@@ -25,9 +26,9 @@ else:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 启动时验证配置
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("智能门禁系统启动中...")
-    print("="*60)
+    print("=" * 60)
 
     # 验证配置
     is_valid = validate_config()
@@ -58,7 +59,7 @@ async def lifespan(app: FastAPI):
     if DEV_MODE:
         print("[提示] 当前为开发模式，使用 Mock 硬件模拟")
         print("[提示] 部署到 RK3568 前请将 config.py 中的 DEV_MODE 改为 False")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
     yield
 
