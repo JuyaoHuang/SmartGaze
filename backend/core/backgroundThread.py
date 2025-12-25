@@ -132,7 +132,7 @@ class BackgroundThread(threading.Thread):
 
                             # 若为已知人脸相似度大于阈值，记录日志并且开锁
                             if sim > self.similarity_threshold:
-                                logging.info(f"✓ 识别成功: {item['name']}, 相似度: {sim:.4f} (阈值: {self.similarity_threshold})")
+                                print(f"✓ 识别成功: {item['name']}, 相似度: {sim:.4f} (阈值: {self.similarity_threshold})")
                                 self.door_lock.open()
                                 logging.info("开锁")
                                 break
