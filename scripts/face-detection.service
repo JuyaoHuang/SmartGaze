@@ -1,0 +1,38 @@
+[Unit]
+Description=智能门禁系统服务 (Smart Face Detection System)
+Documentation=https://github.com/JuyaoHuang/Face-detection-system
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+User=topeet
+Group=topeet
+WorkingDirectory=/home/topeet/face_detection_system
+
+# 启动命令
+ExecStart=/bin/bash /home/topeet/face_detection_system/scripts/start_service.sh
+
+# 停止命令
+ExecStop=/bin/bash /home/topeet/face_detection_system/scripts/stop_service.sh
+
+# PID 文件
+PIDFile=/home/topeet/face_detection_system/service.pid
+
+# 重启策略
+Restart=on-failure
+RestartSec=10
+
+# 资源限制（可选）
+# 限制内存使用（根据实际情况调整）
+# MemoryLimit=1G
+
+# 环境变量（可选）
+# Environment="PYTHONUNBUFFERED=1"
+
+# 标准输出和错误重定向到日志
+StandardOutput=append:/home/topeet/face_detection_system/logs/systemd.log
+StandardError=append:/home/topeet/face_detection_system/logs/systemd-error.log
+
+[Install]
+WantedBy=multi-user.target
